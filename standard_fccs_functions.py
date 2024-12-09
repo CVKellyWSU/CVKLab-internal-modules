@@ -16,6 +16,7 @@ Jan 15, 2024:   Added four-color FCCS for proteins and Cy5, fit and plot many G 
 April 29, 2024: Added subfolder inspectioan definitions
 July 1, 2024: Added analysis functions, like subfolder finding
 July 22, 2024: Made calc_xcorr analyze both +/- tau and average the results, and added more oscilation options
+Oct 22, 2024: Added spectrum for CFP and Cy5
 
 """
 import numpy as np
@@ -858,7 +859,8 @@ def fit_xcorr(G,dtlistsec,model,
               guess_G0 = 0.05,
               guess_lam = 1.5, 
               alpha=1,
-              guess_oscamp = 0.05):
+              guess_oscamp = 0.05,
+              guess_r = 1):
     
     
     ## Model:
@@ -894,7 +896,7 @@ def fit_xcorr(G,dtlistsec,model,
     elif (model.find('2dnoc') > -1 ):
         f = lambda x,td,a: a/(1+(x/td))
         numparam = 2
-        start = (0.005,1)
+        start = (guess_taud,1)
         bound = ((0.0,-np.inf),(1.0,np.inf))##sonali changed lower bound from 0.0 to -np.inf on 11/22/21
     elif (model.find('2d') > -1 ):
         f = lambda x,td,a,c: a/(1+(x/td))+c
@@ -914,8 +916,8 @@ def fit_xcorr(G,dtlistsec,model,
     elif (model.find('3d') > -1):
         f = lambda x,td,a,r: a/(1+(x/td))/np.sqrt(1+(r**-2)*(x/td))
         numparam = 3
-        start = (guess_taud,guess_G0,1)
-        bound = ((0.0,-np.inf,0.01),(1.0,np.inf,np.inf))
+        start = (guess_taud,guess_G0,guess_r)
+        bound = ((0.0,-np.inf,0.01),(10.0,np.inf,np.inf))
 
     else:
         print('no fitting function used')
@@ -1098,8 +1100,7 @@ def shift_calib(shifts,calib1,calib2,aveavelinedata):
 
 def get_cal_functs_SimpleAuto(x00 = 0):
     # analyze the sum intensity vs time for the whole image without fitting
-    x000=x00
-    fcal1 = lambda x,a0,x0 : x*0+a0+x0*0
+    fcal1 = lambda x,a0,x0 : a0+(x+x0+x00)*0
     cal_functs = [fcal1]
     return cal_functs
 
@@ -1113,9 +1114,9 @@ def get_cal_functs_4beads(x00 = 0.5):
                        [ 3.87106582e-01,  9.64674964e-01,  8.18338601e+00, 1.19257260e+01,  1.64262927e+00,  1.12007239e+00, 3.76959928e-03],
                        [ 1.05083661e-01,  9.88523163e-01,  1.23750776e+01, 1.51297056e+01,  1.67860097e+00,  1.12225143e+00, 9.99210771e-04]])
     cal_funct = []
-    f2 = lambda x,a,x0,a12,a22,x12,x22,s12,s22,c2 : a*(a12*np.exp(-(x-x12-x0)**2/2/s12**2)+ \
-                            a22*np.exp(-(x-x22-x0)**2/2/s22**2))+ \
-                            +c2
+    f2 = lambda x,a,x0,a1,a2,x1,x2,s1,s2,c : a*(a1*np.exp(-(x-x1-x0)**2/2/s1**2)+ \
+                                                 a2*np.exp(-(x-x2-x0)**2/2/s2**2)+ \
+                                                 +c)
     fcal1 = lambda x,a,x0 : f2(x,a,x00+x0-0.35746571,*cal_fres[0])
     fcal2 = lambda x,a,x0 : f2(x,a,x00+x0-0.31373466,*cal_fres[1])
     fcal3 = lambda x,a,x0 : f2(x,a,x00+x0-0.54969673,*cal_fres[2])
@@ -1133,12 +1134,26 @@ def get_cal_functs_CFPYFPmCherryCy5(x00 =0.5):
                                                          a2*np.exp(-(x-x2-x0)**2/2/s2**2)+ \
                                                          a3*np.exp(-(x-x3-x0)**2/2/s3**2)+ \
                                                          +c)
-    fcal1 = lambda x,a,x0 : g3(x,a,x0-0.20622223,*cal_fres[0])
-    fcal2 = lambda x,a,x0 : g3(x,a,x0+0.26431572,*cal_fres[1])
-    fcal3 = lambda x,a,x0 : g3(x,a,x0+0.68303148,*cal_fres[2])
+    fcal1 = lambda x,a,x0 : g3(x,a,x0+x00-0.206,*cal_fres[0])
+    fcal2 = lambda x,a,x0 : g3(x,a,x0+x00+0.264,*cal_fres[1])
+    fcal3 = lambda x,a,x0 : g3(x,a,x0+x00+0.683,*cal_fres[2])
     fcal4 = lambda x,a,x0 : g3(x,a,x0+x00,*cal_fres[3])
     cal_functs = [fcal1,fcal2,fcal3,fcal4]
     return cal_functs
+    
+def get_cal_functs_CFPCy5(x00 =0.5):
+    cal_fres = [np.array([ 3.52614527e+01, -3.50497503e+01,  1.05468370e+00,  1.09445042e+01, 1.09351876e+01,  1.55977067e+01,  1.36243273e+00,  1.35352638e+00, 1.21936334e+00, -4.67242434e-05]),
+                 np.array([4.95870095e-01, 6.34787342e-01, 1.00885136e-11, 5.88566435e+00, 4.88221889e+00, 4.96833983e-02, 1.17322429e+00, 9.54524032e-01, 0.80000000e+00, 5.00695133e-03])]
+    cal_funct = []
+    g3 = lambda x,a,x0,a1,a2,a3,x1,x2,x3,s1,s2,s3,c : a*(a1*np.exp(-(x-x1-x0)**2/2/s1**2)+ \
+                                                         a2*np.exp(-(x-x2-x0)**2/2/s2**2)+ \
+                                                         a3*np.exp(-(x-x3-x0)**2/2/s3**2)+ \
+                                                         +c)
+    fcal1 = lambda x,a,x0 : g3(x,a,x0+x00-0.206,*cal_fres[0])
+    fcal2 = lambda x,a,x0 : g3(x,a,x0+x00,*cal_fres[1])
+    cal_functs = [fcal1,fcal2]
+    return cal_functs
+    
 
 def get_cal_functs_CFPYFPmCherry(x00 =0.5):
     cal_fres = [np.array([ 3.52614527e+01, -3.50497503e+01,  1.05468370e+00,  1.09445042e+01, 1.09351876e+01,  1.55977067e+01,  1.36243273e+00,  1.35352638e+00, 1.21936334e+00, -4.67242434e-05]),
@@ -1149,9 +1164,9 @@ def get_cal_functs_CFPYFPmCherry(x00 =0.5):
                                                          a2*np.exp(-(x-x2-x0)**2/2/s2**2)+ \
                                                          a3*np.exp(-(x-x3-x0)**2/2/s3**2)+ \
                                                          +c)
-    fcal1 = lambda x,a,x0 : g3(x,a,x00+x0-0.20622223,*cal_fres[0])
-    fcal2 = lambda x,a,x0 : g3(x,a,x00+x0+0.26431572,*cal_fres[1])
-    fcal3 = lambda x,a,x0 : g3(x,a,x00+x0+0.68303148,*cal_fres[2])
+    fcal1 = lambda x,a,x0 : g3(x,a,x00+x0-0.206,*cal_fres[0])
+    fcal2 = lambda x,a,x0 : g3(x,a,x00+x0+0.264,*cal_fres[1])
+    fcal3 = lambda x,a,x0 : g3(x,a,x00+x0+0.683,*cal_fres[2])
     cal_functs = [fcal1,fcal2,fcal3]
     return cal_functs
 
@@ -1162,8 +1177,8 @@ def get_cal_functs_CFPYFP(x00 =0.5):
                                                          a2*np.exp(-(x-x2-x0)**2/2/s2**2)+ \
                                                          a3*np.exp(-(x-x3-x0)**2/2/s3**2)+ \
                                                          +c)
-    fcal1 = lambda x,a,x0 : g3(x,a,x0-0.20622223,*cal_fres[0])
-    fcal2 = lambda x,a,x0 : g3(x,a,x0+0.26431572,*cal_fres[1])
+    fcal1 = lambda x,a,x0 : g3(x,a,x0+x00-0.206,*cal_fres[0])
+    fcal2 = lambda x,a,x0 : g3(x,a,x0+x00+0.264,*cal_fres[1])
     cal_functs = [fcal1,fcal2]
     return cal_functs
 
@@ -1174,8 +1189,8 @@ def get_cal_functs_CFPmCherry(x00 =0.5):
                                                          a2*np.exp(-(x-x2-x0)**2/2/s2**2)+ \
                                                          a3*np.exp(-(x-x3-x0)**2/2/s3**2)+ \
                                                          +c)
-    fcal1 = lambda x,a,x0 : g3(x,a,x0-0.20622223,*cal_fres[0])
-    fcal2 = lambda x,a,x0 : g3(x,a,x0+0.68303148,*cal_fres[1])
+    fcal1 = lambda x,a,x0 : g3(x,a,x0-0.206,*cal_fres[0])
+    fcal2 = lambda x,a,x0 : g3(x,a,x0+0.683,*cal_fres[1])
     cal_functs = [fcal1,fcal2]
     return cal_functs
 
@@ -1186,8 +1201,8 @@ def get_cal_functs_YFPmCherry(x00 =0.5):
                                                          a2*np.exp(-(x-x2-x0)**2/2/s2**2)+ \
                                                          a3*np.exp(-(x-x3-x0)**2/2/s3**2)+ \
                                                          +c)
-    fcal1 = lambda x,a,x0 : g3(x,a,x00+x0+6.26431572+0.5,*cal_fres[0])
-    fcal2 = lambda x,a,x0 : g3(x,a,x00+x0+6.68303148+0.5,*cal_fres[1])
+    fcal1 = lambda x,a,x0 : g3(x,a,x00+x0+6.764,*cal_fres[0])
+    fcal2 = lambda x,a,x0 : g3(x,a,x00+x0+7.183,*cal_fres[1])
     cal_functs = [fcal1,fcal2]
     return cal_functs
 
@@ -1268,6 +1283,8 @@ def get_filespecific_calibs(tave_data,
         cal_functs = get_cal_functs_CFPYFPmCherry(x00=x00) # CFP, YFP, and mCherry
     elif which_calibration_set == 'CFPYFPmCherryCy5':
         cal_functs = get_cal_functs_CFPYFPmCherryCy5(x00=x00) # CFP, YFP, mCherry, and Cy5
+    elif which_calibration_set == 'CFPCy5':
+        cal_functs = get_cal_functs_CFPCy5(x00=x00) # CFP and Cy5
     else:
         cal_functs = -1
         calibs = -1
@@ -1282,8 +1299,7 @@ def get_filespecific_calibs(tave_data,
         else:
             shift = 0
         calibs = get_singleshift_calibs(cal_functs,shift,len(tave_data))
-    else:
-        shift = 0
+
     return calibs,shift
 
 # %%
@@ -1330,21 +1346,23 @@ def get_corrs_from_TIF(tiffile,
     # data_lines2 = np.mean(data[:3,:,:],axis=0)
     # print('cn',data_lines)
 
-
+    # print(which_calibration_set)
     calibs_now,shift = get_filespecific_calibs(tdata,
                                                which_calibration_set = which_calibration_set,
                                                shifttechnique = shifttechnique,
                                                x00 = x00)
     
     # print('cn',data_lines)simp_inten_vs_time
-    
+
+    if which_calibration_set == 'SimpleAuto':
+        SubtractBackground = False
+        
     if len(calibs_now)<4 and SubtractBackground == True:
         cn = np.zeros((3,32))
         cn[:2,:] = calibs_now
         cn[2,:] = (1/32)
         calibs_now = cn.copy()
         
-
     Mi = get_inv_matN_noBack(calibs_now)
     i0,i1,i2,i3 = fit_many_timesN_noBack(calibs_now,Mi,data_lines)
     # meanIs = np.array([np.mean(i0),np.mean(i1),np.mean(i2),np.mean(i3)])
@@ -1361,10 +1379,9 @@ def get_corrs_from_TIF(tiffile,
         if len(i3)>1000:
             i3s = smooth_IvT(i3,window=maxt,time_per_step = time_per_frame)
             i3 = i3-i3s + np.mean(i3s)
-    
-    
-    if len(calibs_now)<4 and SubtractBackground == True:
-        calibs_now = calibs_now[:-1,:]
+
+   # if len(calibs_now)<4 and SubtractBackground == True:
+   #     calibs_now = calibs_now[:-1,:]
         
     
     if len(i0)>99:
@@ -1455,7 +1472,7 @@ def plot_all_calib_inten_G(dt,corrs,intens,tdata,calibs_now,title='',normalizeG 
     else:
         a1.set_ylabel('Intensity')
     a1.set_xlim([0,x[-1]])
-    a1.legend(loc='upper right')  
+    a1.legend(loc='lower right')  
         
     nn = ''
     for i,G in enumerate(corrs[:len(intens)]):
@@ -1464,7 +1481,7 @@ def plot_all_calib_inten_G(dt,corrs,intens,tdata,calibs_now,title='',normalizeG 
             norm = np.mean(G[:2])
             nn = 'Normalized '
         a2.semilogx(dt,G/norm,'o',color=cols[i],label='Acorr'+str(i+1))
-    sha = '<>^vs'
+    sha = '<>^vsop<>v^'
     if len(corrs)<7:
         lab = ['12','13','23']
     else:
