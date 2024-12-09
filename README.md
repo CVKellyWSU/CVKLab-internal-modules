@@ -33,10 +33,32 @@ import requests, sys
 github_url = 'https://raw.githubusercontent.com/CVKellyWSU/CVKLab-internal-modules/refs/heads/main/'+module+'.py'
 temp_py_file = github_url[(1+github_url.rfind('/')):]
 temp_py_text = requests.get(github_url)
-temp_py_text = temp_py_text.text
+temp_py_text = temp_py_text.text.replace('\r\n', '\n')
 f = open(temp_save_fold+temp_py_file,'w')
 f.write(temp_py_text)
 f.close()
 sys.path.append(temp_save_fold)
 exec('import '+module+' as '+nickname)  
 
+'''
+# Or for multiple module uploads simultaniously
+'''python
+import requests, sys
+module_list = ['standard_fccs_functions',
+               'image_analysis_functions']  # edit this for each module
+nickname_list = ['sff','iaf'] # edit this for each module
+temp_save_fold = r'C:\Users\cvkelly\Downloads/'  # edit this for each computer
+sys.path.append(temp_save_fold[:-1])
+
+for i in range(len(module_list)):
+    module = module_list[i]
+    nickname = nickname_list[i]
+    github_url = 'https://raw.githubusercontent.com/CVKellyWSU/CVKLab-internal-modules/refs/heads/main/'+module+'.py'
+    temp_py_file = github_url[(1+github_url.rfind('/')):]
+    temp_py_text = requests.get(github_url)
+    temp_py_text = temp_py_text.text.replace('\r\n', '\n')
+    f = open(temp_save_fold+temp_py_file,'w')
+    f.write(temp_py_text)
+    f.close()
+    exec('import '+module+' as '+nickname)  
+    
