@@ -1151,6 +1151,7 @@ def get_cal_functs_CFPCy5(x00 =0.5):
                                                          +c)
     fcal1 = lambda x,a,x0 : g3(x,a,x0+x00-0.206,*cal_fres[0])
     fcal2 = lambda x,a,x0 : g3(x,a,x0+x00-2,*cal_fres[1])
+    print('updated 2')
     cal_functs = [fcal1,fcal2]
     return cal_functs
     
