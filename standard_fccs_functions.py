@@ -17,6 +17,7 @@ April 29, 2024: Added subfolder inspectioan definitions
 July 1, 2024: Added analysis functions, like subfolder finding
 July 22, 2024: Made calc_xcorr analyze both +/- tau and average the results, and added more oscilation options
 Oct 22, 2024: Added spectrum for CFP and Cy5
+Dec 9, 2024: Updated CFF and Cy5 spectrum
 
 """
 import numpy as np
@@ -1141,7 +1142,6 @@ def get_cal_functs_CFPYFPmCherryCy5(x00 =0.5):
     cal_functs = [fcal1,fcal2,fcal3,fcal4]
     return cal_functs
     
-
 def get_cal_functs_CFPCy5(x00 =0):
     cal_fres = [np.array([ 3.53814527e+01, -3.50497503e+01,  1.05468370e+00,  1.09445042e+01, 1.09351876e+01,  1.55977067e+01,  1.36243273e+00,  1.35352638e+00, 1.21936334e+00, -4.67242434e-05]),
                  np.array([4.95870095e-01, 6.34787342e-01, 1.00885136e-11, 5.88566435e+00, 4.88221889e+00, 4.96833983e-02, 1.17322429e+00, 9.54524032e-01, 0.80000000e+00, 5.00695133e-03])]
@@ -1155,6 +1155,7 @@ def get_cal_functs_CFPCy5(x00 =0):
     print('6')
     cal_functs = [fcal1,fcal2]
     return cal_functs
+    
 
 def get_cal_functs_CFPYFPmCherry(x00 =0.5):
     cal_fres = [np.array([ 3.52614527e+01, -3.50497503e+01,  1.05468370e+00,  1.09445042e+01, 1.09351876e+01,  1.55977067e+01,  1.36243273e+00,  1.35352638e+00, 1.21936334e+00, -4.67242434e-05]),
