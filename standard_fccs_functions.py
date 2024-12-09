@@ -1141,20 +1141,20 @@ def get_cal_functs_CFPYFPmCherryCy5(x00 =0.5):
     cal_functs = [fcal1,fcal2,fcal3,fcal4]
     return cal_functs
     
-def get_cal_functs_CFPCy5(x00 =0.5):
-    cal_fres = [np.array([ 3.52614527e+01, -3.50497503e+01,  1.05468370e+00,  1.09445042e+01, 1.09351876e+01,  1.55977067e+01,  1.36243273e+00,  1.35352638e+00, 1.21936334e+00, -4.67242434e-05]),
+
+def get_cal_functs_CFPCy5(x00 =0):
+    cal_fres = [np.array([ 3.53814527e+01, -3.50497503e+01,  1.05468370e+00,  1.09445042e+01, 1.09351876e+01,  1.55977067e+01,  1.36243273e+00,  1.35352638e+00, 1.21936334e+00, -4.67242434e-05]),
                  np.array([4.95870095e-01, 6.34787342e-01, 1.00885136e-11, 5.88566435e+00, 4.88221889e+00, 4.96833983e-02, 1.17322429e+00, 9.54524032e-01, 0.80000000e+00, 5.00695133e-03])]
     cal_funct = []
     g3 = lambda x,a,x0,a1,a2,a3,x1,x2,x3,s1,s2,s3,c : a*(a1*np.exp(-(x-x1-x0)**2/2/s1**2)+ \
                                                          a2*np.exp(-(x-x2-x0)**2/2/s2**2)+ \
                                                          a3*np.exp(-(x-x3-x0)**2/2/s3**2)+ \
                                                          +c)
-    fcal1 = lambda x,a,x0 : g3(x,a,x0+x00-0.206,*cal_fres[0])
-    fcal2 = lambda x,a,x0 : g3(x,a,x0+x00-2,*cal_fres[1])
-    print('updated 2')
+    fcal1 = lambda x,a,x0 : g3(x,a,x0+x00-3.16,*cal_fres[0])
+    fcal2 = lambda x,a,x0 : g3(x,a,x0+x00-1.68,*cal_fres[1])
+    print('6')
     cal_functs = [fcal1,fcal2]
     return cal_functs
-    
 
 def get_cal_functs_CFPYFPmCherry(x00 =0.5):
     cal_fres = [np.array([ 3.52614527e+01, -3.50497503e+01,  1.05468370e+00,  1.09445042e+01, 1.09351876e+01,  1.55977067e+01,  1.36243273e+00,  1.35352638e+00, 1.21936334e+00, -4.67242434e-05]),
