@@ -1282,7 +1282,8 @@ def get_filespecific_calibs(tave_data,
         else:
             shift = 0
         calibs = get_singleshift_calibs(cal_functs,shift,len(tave_data))
-
+    else:
+        shift = 0
     return calibs,shift
 
 # %%
