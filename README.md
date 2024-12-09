@@ -16,7 +16,7 @@ MDAnalysis_functions.py
 
 standard_fccs_functions.py
   - functions for reading, writing, and analyzing camera-based fluorescence cross-correlation spectroscopy data
-  - 
+    
 pendant_droplet_functions.py
   - functions for modeling and analyzing images of pendant droplet tensiometry
 
