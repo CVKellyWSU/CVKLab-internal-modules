@@ -16,18 +16,19 @@ MDAnalysis_functions.py
 
 standard_fccs_functions.py
   - functions for reading, writing, and analyzing camera-based fluorescence cross-correlation spectroscopy data
+  - 
+pendant_droplet_functions.py
+  - functions for modeling and analyzing images of pendant droplet tensiometry
 
 
-###########
-To automatically load in your local Spyder, edit this code:
-###########
-
-# edit these lines for each module or computer
+# To automatically load in your local Spyder, edit this code:
+```python
+### edit these lines for each module or computer
 module = 'image_analysis_functions'  # edit this for each module
 nickname = 'iaf' # edit this for each module
 temp_save_fold = r'C:\Users\cvkelly\Downloads/'  # edit this for each computer
 
-# this code should be constant
+### this code should be constant
 import requests, sys
 github_url = 'https://raw.githubusercontent.com/CVKellyWSU/CVKLab-internal-modules/refs/heads/main/'+module+'.py'
 temp_py_file = github_url[(1+github_url.rfind('/')):]
