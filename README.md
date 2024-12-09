@@ -39,10 +39,10 @@ f.write(temp_py_text)
 f.close()
 sys.path.append(temp_save_fold)
 exec('import '+module+' as '+nickname)  
+```
 
-'''
 # Or for multiple module uploads simultaniously
-'''python
+```python
 import requests, sys
 module_list = ['standard_fccs_functions',
                'image_analysis_functions']  # edit this for each module
