@@ -43,7 +43,12 @@ exec('import '+module+' as '+nickname)
 
 # Or for multiple module uploads simultaniously
 ```python
+import numpy as np
+import matplotlib.pyplot as plt
+from os import listdir
+from scipy.optimize import curve_fit
 import requests, sys
+
 module_list = ['standard_fccs_functions',
                'image_analysis_functions']  # edit this for each module
 nickname_list = ['sff','iaf'] # edit this for each module
