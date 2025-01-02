@@ -228,7 +228,22 @@ def plot_traj_v2(u,
     
 def test_funct():
     return 'test function is working'
-    
+
+def gro_line_to_coord(line):
+    # line = tog_lines[100]
+    try:
+        resid = int(line[:5])
+        resname = line[5:9]
+        atom = line[9:15]
+        atnum = int(line[16:20])
+        x = float(line[20:28])
+        y = float(line[28:36])
+        z = float(line[36:44])
+    except:
+        print(line)
+        resid,resname,atom,atnum,x,y,z = 0,0,0,0,0,0,0
+    return resid,resname,atom,atnum,x,y,z
+
 def loc_to_str(x,y,z,atnum = 0,numspacesforatomnum=5):
     spaces = '       '
     x = str(x)
